@@ -1,0 +1,12 @@
+declare module "*.csl" {
+  const content: string;
+  export default content;
+}
+declare module "*.xml" {
+  const content: string;
+  export default content;
+}
+declare module "*.wasm" {
+  const content: Uint8Array;
+  export default content;
+}

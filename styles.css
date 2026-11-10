@@ -1,0 +1,338 @@
+/* EndNote Cite */
+
+.en-cite {
+  cursor: text;
+  border-radius: 4px;
+  padding: 0 2px;
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+  font-variant-ligatures: none;
+}
+
+.en-cite:hover {
+  background: var(--background-modifier-border);
+}
+
+.en-cite-missing {
+  color: var(--text-error);
+  border-bottom: 1px dotted var(--text-error);
+}
+
+/* ── autocomplete ─────────────────────────────────────────── */
+.en-suggest-item {
+  padding: 6px 10px !important;
+  line-height: 1.35;
+}
+.en-suggest-top {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.en-suggest-key {
+  font-family: var(--font-monospace);
+  font-size: 0.78em;
+  color: var(--text-accent);
+  background: var(--background-primary-alt);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+.en-suggest-when {
+  color: var(--text-muted);
+  font-size: 0.82em;
+}
+.en-suggest-title {
+  font-size: 0.9em;
+  color: var(--text-normal);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.en-suggest-sub {
+  font-size: 0.76em;
+  color: var(--text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── insert dialog ────────────────────────────────────────── */
+.en-modal h3 {
+  margin: 0 0 10px 0;
+}
+.en-modal-input {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 1em;
+}
+.en-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 0 0;
+}
+.en-chip {
+  background: var(--background-modifier-hover);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 999px;
+  padding: 1px 10px;
+  font-size: 0.8em;
+  font-family: var(--font-monospace);
+  cursor: pointer;
+}
+.en-modal-list {
+  margin-top: 8px;
+  max-height: 46vh;
+  overflow-y: auto;
+}
+.en-row {
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+}
+.en-row.is-active {
+  background: var(--background-modifier-hover);
+  border-left-color: var(--text-accent);
+}
+.en-empty {
+  color: var(--text-faint);
+  font-size: 0.85em;
+  padding: 8px 2px;
+}
+
+/* ── library sidebar ──────────────────────────────────────── */
+.en-exp {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 8px 10px 0 10px;
+  gap: 6px;
+  overflow: hidden;
+}
+.en-exp-search {
+  flex: 0 0 auto;
+}
+.en-exp-input {
+  width: 100%;
+  padding: 5px 8px;
+  font-size: 0.92em;
+}
+.en-exp-scope {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  padding: 3px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  cursor: pointer;
+  font-size: 0.84em;
+  color: var(--text-normal);
+}
+.en-exp-scope:hover {
+  background: var(--background-modifier-hover);
+}
+.en-exp-scope-name {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.en-exp-scope-count {
+  flex: 0 0 auto;
+  font-family: var(--font-monospace);
+  font-size: 0.9em;
+  color: var(--text-faint);
+}
+.en-exp-scope-chevron {
+  flex: 0 0 auto;
+  font-size: 0.85em;
+  color: var(--text-faint);
+}
+
+/* floating group list (portalled to body) */
+.en-exp-menu {
+  position: fixed;
+  z-index: var(--layer-menu, 1000);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 4px;
+  max-height: 320px;
+  overflow-y: auto;
+  background: var(--background-secondary, var(--background-primary));
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-s, 0 6px 20px rgba(0, 0, 0, 0.22));
+}
+.en-exp-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.86em;
+  color: var(--text-muted);
+}
+.en-exp-menu-item:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+.en-exp-menu-item.is-active {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 var(--text-accent);
+}
+.en-exp-menu-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.en-exp-menu-count {
+  flex: 0 0 auto;
+  font-family: var(--font-monospace);
+  font-size: 0.9em;
+  color: var(--text-faint);
+}
+.en-exp-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 8px;
+}
+.en-exp-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 6px 6px 6px 8px;
+  border-radius: 6px;
+  border-left: 2px solid transparent;
+}
+.en-exp-item:hover {
+  background: var(--background-modifier-hover);
+  border-left-color: var(--text-accent);
+}
+.en-exp-item.is-cited .en-exp-title {
+  color: var(--text-muted);
+}
+.en-exp-item-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  cursor: pointer;
+}
+.en-exp-title {
+  font-size: 0.88em;
+  line-height: 1.3;
+  color: var(--text-normal);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.en-exp-meta-text {
+  font-size: 0.74em;
+  color: var(--text-faint);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.en-exp-detail-key {
+  font-family: var(--font-monospace);
+  color: var(--text-accent);
+}
+.en-exp-add {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  line-height: 20px;
+  font-size: 15px;
+  border-radius: 5px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.en-exp-add:hover {
+  background: var(--interactive-accent);
+  border-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+.en-exp-detail {
+  font-size: 0.76em;
+  color: var(--text-muted);
+  padding: 6px 2px 2px 0;
+}
+.en-exp-detail-line {
+  margin-bottom: 2px;
+}
+.en-exp-abstract {
+  margin-top: 4px;
+  color: var(--text-faint);
+  max-height: 7em;
+  overflow-y: auto;
+  line-height: 1.4;
+}
+.en-exp-copy {
+  margin-top: 6px;
+  font-size: 0.9em;
+  padding: 1px 8px;
+}
+.en-exp-status {
+  flex: 0 0 auto;
+  font-size: 0.72em;
+  color: var(--text-faint);
+  border-top: 1px solid var(--background-modifier-border);
+  padding: 5px 2px 6px 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── bibliography block ───────────────────────────────────── */
+.en-bib-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding: 0 4px 4px 2px;
+  margin-bottom: 6px;
+}
+.en-bib-refresh {
+  font-size: 0.9em;
+  padding: 0 6px;
+  height: 20px;
+  line-height: 18px;
+}
+.en-bib-list {
+  margin: 0;
+  padding-left: 22px;
+  font-size: 0.9em;
+  line-height: 1.45;
+}
+.en-bib-list li {
+  margin-bottom: 4px;
+}
+.en-hanging {
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+.en-status {
+  font-size: 0.82em;
+  color: var(--text-muted);
+  margin: 4px 0 14px 0;
+}
+.en-hint {
+  font-size: 0.82em;
+  color: var(--text-faint);
+  margin-top: 18px;
+}

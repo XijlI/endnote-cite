@@ -1,0 +1,9 @@
+{
+  "id": "endnote-cite",
+  "name": "EndNote Cite",
+  "version": "0.3.1",
+  "minAppVersion": "1.5.0",
+  "description": "Cite as you write with your EndNote library: insert citations with autocomplete, see them formatted live, and export to Word or LaTeX.",
+  "author": "i2026",
+  "isDesktopOnly": true
+}

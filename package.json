@@ -1,0 +1,30 @@
+{
+  "name": "endnote-cite",
+  "version": "0.3.1",
+  "description": "Cite as you write with your EndNote library, then export to Word or LaTeX.",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "test": "node --experimental-strip-types test/run.mjs"
+  },
+  "keywords": [
+    "obsidian",
+    "endnote",
+    "citation",
+    "pandoc"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "builtin-modules": "^4.0.0",
+    "esbuild": "^0.25.0",
+    "obsidian": "^1.8.7",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "citeproc": "^2.4.63",
+    "sql.js": "^1.13.0"
+  }
+}
