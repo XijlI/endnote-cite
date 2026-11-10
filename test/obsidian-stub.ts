@@ -32,7 +32,9 @@ export class Plugin extends Component {
   registerEditorExtension() {}
   registerEditorSuggest() {}
   registerMarkdownPostProcessor() {}
-  registerMarkdownCodeBlockProcessor() {}
+  registerMarkdownCodeBlockProcessor(lang: string, fn: any) {
+    ((globalThis as any).__codeBlocks ??= {})[lang] = fn;
+  }
   addCommand(cmd: any) {
     ((global as any).__commands ??= []).push(cmd);
   }
@@ -49,7 +51,7 @@ export class PluginSettingTab {
   constructor(public app: any, public plugin: any) {}
 }
 
-class FakeEl {
+export class FakeEl {
   children: FakeEl[] = [];
   listeners: Record<string, ((ev: any) => void)[]> = {};
   value = "";

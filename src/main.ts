@@ -20,6 +20,12 @@ export default class EndNoteCitePlugin extends Plugin {
   exporter: Exporter;
   endNoteStyleName = "";
 
+  /** Rendered ```endnote-bib``` blocks, so they can be redrawn when the library,
+   *  the style or the note itself changes. */
+  private bibBlocks = new Set<{ el: HTMLElement; source: string; path: string }>();
+  private bibRenderSeq = new WeakMap<HTMLElement, number>();
+  private bibTimer: number | null = null;
+
   private styleXmlCache = "";
   private styleRev = 0;
   private matchedStyle: { id: string; label: string } | null = null;
@@ -66,8 +72,23 @@ export default class EndNoteCitePlugin extends Plugin {
     });
 
     this.registerMarkdownCodeBlockProcessor("endnote-bib", (source, el, ctx) => {
+      this.bibBlocks.add({ el, source, path: ctx.sourcePath });
       void this.renderBibliographyBlock(source, el, ctx.sourcePath);
     });
+
+    // ...and redraw them as the note is edited, so adding a `[@key]` shows up in
+    // the list below without a manual refresh.
+    this.registerEvent(
+      this.app.workspace.on("editor-change", (editor: Editor, info: any) => {
+        const path = info?.file?.path;
+        if (!path) return;
+        if (this.bibTimer) window.clearTimeout(this.bibTimer);
+        this.bibTimer = window.setTimeout(() => {
+          this.bibTimer = null;
+          this.refreshBibliographyBlocks(path, editor?.getValue?.());
+        }, 400);
+      })
+    );
 
     // Keep the library in sync while EndNote is open.
     this.registerInterval(
@@ -142,6 +163,7 @@ export default class EndNoteCitePlugin extends Plugin {
     this.registerCommands();
     this.ribbonEl?.setAttribute("aria-label", t("ribbon.library"));
     this.refreshExplorer();
+    this.refreshBibliographyBlocks();
     for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE)) {
       (leaf as any).updateHeader?.();
     }
@@ -254,6 +276,25 @@ export default class EndNoteCitePlugin extends Plugin {
     this.styleRev++;
     this.renderCache.sig = "";
     this.app.workspace.updateOptions();
+    this.refreshBibliographyBlocks();
+  }
+
+  /**
+   * Redraws the rendered `endnote-bib` blocks. `path` limits it to one note;
+   * `noteText` is the editor's live text, used while the file on disk is still
+   * a keystroke behind.
+   */
+  refreshBibliographyBlocks(path?: string, noteText?: string): void {
+    for (const ref of [...this.bibBlocks]) {
+
+      if (ref.el.isConnected === false) {
+        this.bibBlocks.delete(ref); // the section was re-rendered or scrolled away
+        continue;
+      }
+      if (path && ref.path !== path) continue;
+      if ((ref.el as any).querySelector?.(".cm-editor")) continue; // being edited right now
+      void this.renderBibliographyBlock(ref.source, ref.el, ref.path, noteText);
+    }
   }
 
   refreshEditors() {
@@ -375,14 +416,27 @@ export default class EndNoteCitePlugin extends Plugin {
 
   // ── bibliography block ────────────────────────────────────
 
-  private async renderBibliographyBlock(source: string, el: HTMLElement, sourcePath: string) {
-    el.empty();
+  private async renderBibliographyBlock(
+    source: string,
+    el: HTMLElement,
+    sourcePath: string,
+    noteText?: string,
+  ) {
+    // A slower render must never overwrite a newer one: each call takes a token
+    // and bails out if another render for the same block started meanwhile.
+    const token = (this.bibRenderSeq.get(el) ?? 0) + 1;
+    this.bibRenderSeq.set(el, token);
+
     const file = this.app.vault.getAbstractFileByPath(sourcePath);
+    const text =
+      noteText ?? (file instanceof TFile ? await this.app.vault.cachedRead(file) : "");
+    if (this.bibRenderSeq.get(el) !== token) return;
+
+    el.empty();
     if (!(file instanceof TFile)) {
       el.createDiv({ cls: "en-empty", text: t("bib.cannotRead") });
       return;
     }
-    const text = await this.app.vault.cachedRead(file);
     const keys = this.library.keysInText(text);
 
     const header = el.createDiv({ cls: "en-bib-header" });

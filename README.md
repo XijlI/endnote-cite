@@ -16,7 +16,7 @@ EndNote's own `.enl` database, so nothing has to be exported by hand.
 | **Cite as you write** | Type `[@` in a note to get a searchable reference list; the citation is inserted as `[@citeKey]`. |
 | **Live formatting** | `[@citeKey]` is rendered as `(de Vos et al., 2022)` or `[1]`, depending on the style. Put the cursor inside and the raw marker comes back for editing. |
 | **Style** | Reads the output style currently selected in EndNote and maps it onto the closest CSL style; any `.csl` file can be used instead. |
-| **Bibliography** | `insert bibliography` writes a formatted list, or drop a ` ```endnote-bib ` block into the note for a live list. |
+| **Bibliography** | `insert bibliography` writes a formatted list, or drop a ` ```endnote-bib ` block into the note and it keeps itself up to date. |
 | **Export** | `.docx` (with references, optionally styled by your own Word template), `.tex` + `.bib`, `.bib`, CSL-JSON. |
 | **Library sidebar** | Search the library, browse EndNote groups, and insert a citation with one click. |
 | **EndNote-native Word output** | A second Word mode that hands the document to Word + EndNote so they write real `ADDIN EN.CITE` fields — the same thing you get from *Insert Citation* in Word. |
@@ -58,6 +58,35 @@ Multiple sources in one bracket: [@Shi2017; @deVos2022].
 - <kbd>Ctrl/Cmd</kbd>+<kbd>P</kbd> → “EndNote: Insert citation” for the search dialog
   (<kbd>Shift</kbd>+<kbd>Enter</kbd> collects several references).
 - `[@key, p. 12]` adds a page locator, matching pandoc's citation syntax.
+
+## The reference list
+
+There are two ways to get a formatted reference list at the end of a note.
+
+**Static text** — command palette → *EndNote: Insert bibliography*. It writes the
+formatted list into the note once. Simple, but it does not follow later edits.
+
+**Live block** — add an empty fenced code block tagged `endnote-bib`:
+
+````markdown
+## References
+
+```endnote-bib
+```
+````
+
+The plugin replaces the block with the reference list for every `[@key]` in the
+note — nothing is stored in the note itself, the source stays those two lines.
+The list redraws by itself when:
+
+- you cite something new, or delete a citation (about half a second after you stop typing);
+- EndNote saves the library (within 5 s) — new references appear, edited metadata updates;
+- you change the output style or the UI language;
+- you press `↻ Refresh` in the block header.
+
+The heading text comes from **Settings ▸ EndNote Cite ▸ Bibliography title**
+(`References` by default). The block is ignored by the exporters — Word, LaTeX and
+BibTeX all build their own reference list — so it is safe to leave in the note.
 
 ## Exporting
 

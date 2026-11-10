@@ -13,6 +13,8 @@ import { planCitationInsert } from "../src/insert";
 
 (globalThis as any).window = globalThis;
 
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 const vaultRoot = fs.mkdtempSync(path.join(os.tmpdir(), "en-vault-"));
 const noteRel = "Papers/Gut paper.md";
 const noteAbs = path.join(vaultRoot, noteRel);
@@ -316,6 +318,45 @@ async function main() {
   check("inserted row is marked as cited", view.contentEl.findAll("en-exp-item")[0].hasClass("is-cited"));
   view.syncCited();
   check("cited keys tracked from the note text", view.cited.size === 1, String(view.cited.size));
+
+  // ── 11. the live ```endnote-bib``` block ────────────────────
+  console.log("--- 11. live bibliography block ---");
+  const { FakeEl } = await import("./obsidian-stub");
+  const proc = (globalThis as any).__codeBlocks?.["endnote-bib"];
+  check("endnote-bib processor is registered", typeof proc === "function");
+
+  const blockEl: any = new FakeEl();
+  proc("", blockEl, { sourcePath: noteRel });
+  await wait(300);
+  const header1 = blockEl.find("en-bib-header")?.dump() ?? "";
+  check("block renders a bibliography list", !!blockEl.find("en-bib-list"));
+  check("block header shows the title and count", /References · \d+/.test(header1), header1);
+
+  // A library reload / style change calls invalidate(); the block must follow.
+  plugin.settings.bibTitle = "Works Cited";
+  plugin.refreshEditors();
+  await wait(300);
+  const header2 = blockEl.find("en-bib-header")?.dump() ?? "";
+  check("block redraws when the library or style changes", header2.includes("Works Cited"), header2);
+  check("redraw keeps the entries", !!blockEl.find("en-bib-list"));
+
+  // Editing another note must not touch this one's block.
+  plugin.settings.bibTitle = "Other note only";
+  plugin.refreshBibliographyBlocks("Papers/elsewhere.md", "text [@Koh2016]");
+  await wait(300);
+  check(
+    "blocks of other notes are left alone",
+    !(blockEl.find("en-bib-header")?.dump() ?? "").includes("Other note only")
+  );
+
+  // Typing a new citation in this note redraws it with the extra entry.
+  const before = (blockEl.find("en-bib-list")?.children ?? []).length;
+  plugin.refreshBibliographyBlocks(noteRel, `${noteBody}\nSee also [@Ahmed2024].`);
+  await wait(300);
+  const after = (blockEl.find("en-bib-list")?.children ?? []).length;
+  check("editing the note adds the new entry", after === before + 1, `${before} → ${after}`);
+  plugin.settings.bibTitle = "References";
+  await plugin.saveSettings();
 
   console.log("\nvault root:", vaultRoot);
 }
