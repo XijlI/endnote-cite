@@ -4,6 +4,11 @@ Cite as you write with your **EndNote** library, then export to **Word** or **La
 An Obsidian take on EndNote's Word add-in: the library is read straight out of
 EndNote's own `.enl` database, so nothing has to be exported by hand.
 
+> EndNote Cite is an independent, unofficial plugin. It isn't affiliated with,
+> endorsed by, or supported by Clarivate (the maker of EndNote) or by Obsidian.
+> "EndNote" is a trademark of Clarivate, used here only to say which library format
+> the plugin reads. Using it still requires your own EndNote licence.
+
 *[中文说明](README.zh-CN.md)*
 
 ![EndNote Cite in Obsidian: formatted citations, live bibliography and the library sidebar](docs/screenshot.png)

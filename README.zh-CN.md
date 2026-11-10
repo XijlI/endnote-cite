@@ -3,6 +3,10 @@
 在 Obsidian 里像用 Word 的 EndNote 插件那样：**边写边插入引用**，文献直接读自 EndNote
 的 `.enl` 库，写完一键**导出 Word / LaTeX**。
 
+> EndNote Cite 是独立的第三方插件，与 Clarivate（EndNote 的出品方）和 Obsidian 均无隶属、
+> 授权或赞助关系。「EndNote」是 Clarivate 的商标，这里仅用于说明插件读取的是哪种文献库格式。
+> 使用本插件仍需你自备 EndNote 授权。
+
 *[English](README.md)*
 
 ![EndNote Cite 在 Obsidian 里：格式化引用、实时参考文献表和文献库侧边栏](docs/screenshot.png)
