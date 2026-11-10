@@ -183,8 +183,15 @@ writing is what lands in the document.
 ```bash
 npm install
 npm run build     # tsc + esbuild → main.js
-node test/build.mjs && node test/.build/plugin-test.cjs   # headless end-to-end test
+npm test          # headless end-to-end test (needs pandoc; skipped parts need Word/EndNote)
 ```
+
+Releasing is one tag: bump `manifest.json`, `package.json` and `versions.json`,
+commit, then `git push origin v0.3.4`. `.github/workflows/release.yml` builds the
+plugin, zips it with `bridge/`, writes `SHA256SUMS.txt` and publishes the GitHub
+release. Notes come from `docs/release-notes/v<version>.md` when that file exists
+(English body plus a collapsible 中文说明), otherwise from the commits since the
+previous tag.
 
 Install by copying `main.js`, `manifest.json`, `styles.css` **and the `bridge/`
 folder** into `<vault>/.obsidian/plugins/endnote-cite/` — without `bridge/` the

@@ -169,8 +169,14 @@ GB/T 7714-2015（顺序编码制 / 著者-出版年制）、IEEE、AMA、Elsevie
 ```bash
 npm install
 npm run build     # tsc + esbuild → main.js
-node test/build.mjs && node test/.build/plugin-test.cjs   # 无界面端到端测试
+npm test          # 无界面端到端测试（需要 pandoc；涉及 Word/EndNote 的用例会跳过）
 ```
+
+发版只要打一个标签：改好 `manifest.json`、`package.json`、`versions.json` 的版本号，
+提交后 `git push origin v0.3.4`。`.github/workflows/release.yml` 会自动构建、连带
+`bridge/` 一起打包成 zip、生成 `SHA256SUMS.txt` 并发布 GitHub Release。发布说明优先用
+`docs/release-notes/v<版本>.md`（英文正文 + 可折叠中文说明），没有这个文件就按上个标签
+以来的提交自动生成。
 
 ## 许可
 

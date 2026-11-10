@@ -1,0 +1,111 @@
+name: Release
+
+# Push a tag (git push origin v0.3.4) and GitHub builds, packages and publishes
+# the release by itself. The Actions tab's "Run workflow" button does the same and
+# creates the tag when it does not exist yet.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version without the leading v (e.g. 0.3.4)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      # The tag is the version; manifest.json has to agree with it, otherwise
+      # Obsidian refuses to install the update.
+      - name: Check the version
+        id: v
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
+            version="${GITHUB_REF_NAME#v}"
+          else
+            version="${INPUT_VERSION#v}"
+          fi
+          if ! printf '%s' "${version}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::'${version}' is not a version like 0.3.4"
+            exit 1
+          fi
+          actual="$(node -p "require('./manifest.json').version")"
+          if [ "${version}" != "${actual}" ]; then
+            echo "::error::manifest.json says ${actual}, the tag says ${version} — bump manifest.json, package.json and versions.json, commit, then tag"
+            exit 1
+          fi
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+
+      - name: Install and build
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build
+
+      - name: Package
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist/plugin
+          cp main.js manifest.json styles.css dist/plugin/
+          cp -r bridge dist/plugin/
+          (cd dist/plugin && zip -qrX "../endnote-cite-${VERSION}.zip" .)
+          cp main.js manifest.json styles.css dist/
+          (cd dist && sha256sum --text "endnote-cite-${VERSION}.zip" main.js manifest.json styles.css > SHA256SUMS.txt)
+          cat dist/SHA256SUMS.txt
+          unzip -l "dist/endnote-cite-${VERSION}.zip"
+
+      - name: Release notes
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
+        run: node .github/scripts/release-notes.mjs "${VERSION}" dist/release-notes.md
+
+      - name: Create the tag
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          set -euo pipefail
+          if git rev-parse -q --verify "refs/tags/v${VERSION}" > /dev/null; then
+            echo "tag v${VERSION} already exists — updating that release"
+          else
+            git tag -a "v${VERSION}" -m "EndNote Cite ${VERSION}"
+            git push origin "v${VERSION}"
+          fi
+
+      - uses: softprops/action-gh-release@v3
+        with:
+          tag_name: v${{ steps.v.outputs.version }}
+          name: ${{ steps.v.outputs.version }}
+          body_path: dist/release-notes.md
+          files: |
+            dist/endnote-cite-${{ steps.v.outputs.version }}.zip
+            dist/main.js
+            dist/manifest.json
+            dist/styles.css
+            dist/SHA256SUMS.txt
+          fail_on_unmatched_files: true
+          overwrite_files: true
+          make_latest: true
