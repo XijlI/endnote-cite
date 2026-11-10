@@ -223,6 +223,7 @@ export class CiteExplorerView extends ItemView {
 
   private render(): void {
     if (!this.listEl) return;
+    const keepScroll = this.listEl.scrollTop ?? 0;
     const lib = this.plugin.library;
 
     if (!lib.refs.length) {
@@ -251,32 +252,55 @@ export class CiteExplorerView extends ItemView {
     const count = t("exp.status", { scope, n: hits.length });
     const truncated = hits.length >= MAX_ROWS ? t("exp.truncated") : "";
     this.statusEl?.setText?.(`${count}${truncated} · ${this.plugin.styleLabel()}`);
+    this.listEl.scrollTop = keepScroll;
   }
 
   private renderRow(ref: Ref): void {
     if (!this.listEl) return;
     const isCited = this.cited.has(ref.citeKey);
-    const row = this.listEl.createDiv({ cls: "en-exp-item" + (isCited ? " is-cited" : "") });
+    const isOpen = this.expanded.has(ref.citeKey);
+    const row = this.listEl.createDiv({
+      cls: "en-exp-item" + (isCited ? " is-cited" : "") + (isOpen ? " is-open" : ""),
+    });
+    row.setAttribute("data-key", ref.citeKey);
+    row.setAttribute("role", "button");
+    row.setAttribute("tabindex", "0");
+    row.setAttribute("aria-expanded", String(isOpen));
+    row.setAttribute(
+      "aria-label",
+      `${ref.title || t("exp.untitled")} — ${isOpen ? t("exp.collapse") : t("exp.expand")}`,
+    );
+    row.setAttribute("title", `@${ref.citeKey}`);
+
+    row.createSpan({ cls: "en-exp-chevron", text: isOpen ? "▾" : "▸" });
 
     const main = row.createDiv({ cls: "en-exp-item-main" });
     main.createDiv({ cls: "en-exp-title", text: ref.title || t("exp.untitled") });
     main.createDiv({ cls: "en-exp-meta-text", text: (isCited ? "✓ " : "") + metaLine(ref) });
-    row.setAttribute("title", `@${ref.citeKey}`);
 
     const add = row.createEl("button", { cls: "en-exp-add", text: "+" });
     add.setAttribute("aria-label", t("exp.ariaInsert", { key: ref.citeKey }));
+    add.setAttribute("title", t("exp.ariaInsert", { key: ref.citeKey }));
     add.addEventListener("click", (ev: MouseEvent) => {
       ev.stopPropagation();
       this.insert(ref);
     });
 
-    main.addEventListener("click", () => {
-      if (this.expanded.has(ref.citeKey)) this.expanded.delete(ref.citeKey);
-      else this.expanded.add(ref.citeKey);
-      this.render();
+    // The whole row is the toggle: a narrow sidebar leaves no room for a small
+    // "click the title" target, and the details panel must never squeeze it.
+    row.addEventListener("click", (ev: MouseEvent) => {
+      const target = (ev.target ?? null) as HTMLElement | null;
+      if (target?.closest?.(".en-exp-detail")) return; // let people select text
+      if (target?.closest?.(".en-exp-add")) return; // handled above
+      this.toggleRow(ref.citeKey);
+    });
+    row.addEventListener("keydown", (ev: KeyboardEvent) => {
+      if (ev.key !== "Enter" && ev.key !== " " && ev.key !== "Spacebar") return;
+      ev.preventDefault?.();
+      this.toggleRow(ref.citeKey, true);
     });
 
-    if (this.expanded.has(ref.citeKey)) {
+    if (isOpen) {
       const detail = row.createDiv({ cls: "en-exp-detail" });
       detail.createDiv({ cls: "en-exp-detail-line en-exp-detail-key", text: `@${ref.citeKey}` });
       const bits: string[] = [];
@@ -296,6 +320,16 @@ export class CiteExplorerView extends ItemView {
         new Notice(t("exp.copied", { key: ref.citeKey }));
       });
     }
+  }
+
+  /** Expands or collapses one row, keeping the list scrolled where it was. */
+  private toggleRow(key: string, keepFocus = false): void {
+    if (this.expanded.has(key)) this.expanded.delete(key);
+    else this.expanded.add(key);
+    this.render();
+    if (!keepFocus) return;
+    const el = this.listEl?.querySelector?.(`.en-exp-item[data-key="${key}"]`) as HTMLElement | null;
+    el?.focus?.();
   }
 
   private insert(ref: Ref): void {

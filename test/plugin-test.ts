@@ -272,11 +272,28 @@ async function main() {
   check("search box filters", hits.length > 0 && hits.length < itemRows.length, `${hits.length} rows`);
   check("filtered row is the match", (hits[0]?.find("en-exp-title")?.textContent ?? "").includes("Gut microbiome"));
 
-  // Expanding a row reveals the key, journal and abstract.
-  hits[0]?.find("en-exp-item-main")?.emit("click");
+  // Expanding a row reveals the key, journal and abstract. The *whole* row is
+  // the toggle — in a narrow sidebar there is no reliable "click the title"
+  // target left once the details panel has taken the width.
+  const row = hits[0]!;
+  row.emit("click");
   const detail = view.contentEl.find("en-exp-detail");
   check("expanding a row shows its citation key", (detail?.dump() ?? "").includes("@deVos2022"));
   check("expanding a row shows journal/pages", /Gut, vol\. 71/.test(detail?.dump() ?? ""));
+
+  const openRow = view.contentEl.findAll("en-exp-item").find((r) => r.hasClass("is-open"));
+  check("open row is flagged for styling", !!openRow);
+  check("open row points its chevron down", (openRow?.find("en-exp-chevron")?.textContent ?? "") === "▾");
+
+  openRow!.emit("click");
+  check("clicking the row again collapses it", view.expanded.size === 0, String(view.expanded.size));
+  check("details are gone after collapsing", !view.contentEl.find("en-exp-detail"));
+
+  // Keyboard: the row is a button, Enter toggles it.
+  view.contentEl.findAll("en-exp-item")[0]!.emit("keydown", { key: "Enter", preventDefault() {} });
+  check("Enter on a row expands it", view.expanded.size === 1, String(view.expanded.size));
+  view.contentEl.findAll("en-exp-item")[0]!.emit("keydown", { key: "Enter", preventDefault() {} });
+  check("Enter on a row collapses it again", view.expanded.size === 0, String(view.expanded.size));
 
   search.value = "";
   search.emit("input");

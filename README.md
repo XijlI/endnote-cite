@@ -120,7 +120,9 @@ open a panel on the right:
 - **`+` on any row** — drops `[@key]` at the caret of the note you were last
   editing. If the caret is already inside a `[...]` it appends `; @key` instead.
 - **Click the row itself** — expands the record (citation key, volume/issue/pages,
-  DOI, type, abstract) with a *copy citation key* button.
+  DOI, type, abstract) with a *copy citation key* button; click anywhere on the row
+  again to collapse it. The whole row is the target, and `Enter` toggles it from the
+  keyboard, so a narrow sidebar is no obstacle.
 - Rows already cited in the current note show a ✓ and a muted title.
 
 The list follows the library file: saving in EndNote refreshes it within a few

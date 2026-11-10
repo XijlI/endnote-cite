@@ -118,6 +118,8 @@ const DICT: Record<string, Entry> = {
   "exp.untitled": { en: "(untitled)", zh: "(无标题)" },
   "exp.ariaInsert": { en: "Insert @{key}", zh: "插入 @{key}" },
   "exp.copyKey": { en: "Copy citation key", zh: "复制引用键" },
+  "exp.expand": { en: "Show details", zh: "展开详情" },
+  "exp.collapse": { en: "Hide details", zh: "收起详情" },
   "exp.copied": { en: "Copied @{key}", zh: "已复制 @{key}" },
   "exp.openNoteFirst": {
     en: "Open a note and put the cursor where the citation should go",
