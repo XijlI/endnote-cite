@@ -269,7 +269,8 @@ export default class EndNoteCitePlugin extends Plugin {
   }
 
   private localeXml(styleXml: string): string {
-    return /default-locale="zh/i.test(styleXml) ? zhCN : enUS;
+    // LF-normalised so the bundle does not depend on the checkout's line endings.
+    return (/default-locale="zh/i.test(styleXml) ? zhCN : enUS).replace(/\r\n?/g, "\n");
   }
 
   private invalidate() {

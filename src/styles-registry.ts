@@ -1,5 +1,12 @@
 /** Bundled CSL styles. The XML is inlined at build time by esbuild's text loader. */
 
+/**
+ * Line endings must never reach the bundle: the community directory rebuilds the
+ * plugin and compares the result with the committed `main.js`, so a CRLF checkout
+ * would produce a different bundle for the same source.
+ */
+const lf = (s: string) => s.replace(/\r\n?/g, "\n");
+
 import harvardCiteThemRight from "../assets/styles/harvard-cite-them-right.csl";
 import nature from "../assets/styles/nature.csl";
 import apa from "../assets/styles/apa.csl";
@@ -23,46 +30,46 @@ export const STYLE_PRESETS: StylePreset[] = [
   {
     id: "harvard-cite-them-right",
     label: "Harvard (Cite Them Right) — author-date",
-    xml: harvardCiteThemRight,
+    xml: lf(harvardCiteThemRight),
     aliases: ["cite them right", "harvard"],
   },
-  { id: "nature", label: "Nature — numeric", xml: nature, aliases: ["nature"] },
-  { id: "apa", label: "APA 7th — author-date", xml: apa, aliases: ["apa", "american psychological"] },
+  { id: "nature", label: "Nature — numeric", xml: lf(nature), aliases: ["nature"] },
+  { id: "apa", label: "APA 7th — author-date", xml: lf(apa), aliases: ["apa", "american psychological"] },
   {
     id: "chicago-author-date",
     label: "Chicago — author-date",
-    xml: chicagoAuthorDate,
+    xml: lf(chicagoAuthorDate),
     aliases: ["chicago"],
   },
   {
     id: "gb-numeric",
     label: "GB/T 7714-2015 — numeric",
-    xml: gbNumeric,
+    xml: lf(gbNumeric),
     aliases: ["gb/t", "gbt", "7714", "chinese"],
   },
   {
     id: "gb-author-date",
     label: "GB/T 7714-2015 — author-date",
-    xml: gbAuthorDate,
+    xml: lf(gbAuthorDate),
     aliases: ["gb/t", "gbt", "7714"],
   },
-  { id: "ieee", label: "IEEE — numeric", xml: ieee, aliases: ["ieee"] },
+  { id: "ieee", label: "IEEE — numeric", xml: lf(ieee), aliases: ["ieee"] },
   {
     id: "american-medical-association",
     label: "AMA — numeric",
-    xml: ama,
+    xml: lf(ama),
     aliases: ["american medical", "jama"],
   },
   {
     id: "elsevier-vancouver",
     label: "Elsevier Vancouver — numeric",
-    xml: elsevierVancouver,
+    xml: lf(elsevierVancouver),
     aliases: ["vancouver", "elsevier"],
   },
   {
     id: "springer-basic-brackets",
     label: "Springer Basic — numeric",
-    xml: springerBrackets,
+    xml: lf(springerBrackets),
     aliases: ["springer"],
   },
 ];
