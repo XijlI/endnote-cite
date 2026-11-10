@@ -14,9 +14,9 @@ export interface CiteRenderer {
 
 /**
  * citeproc emits inline formatting only, but the text inside comes from the
- * user's own library. Rather than sanitising a string and handing it to
- * `innerHTML`, we walk the markup and rebuild the few tags we allow as DOM
- * nodes, so nothing else can ever be parsed as HTML.
+ * user's own library. We never hand a markup string to the DOM: the string is
+ * walked and the few tags we allow are rebuilt as nodes, so nothing else can
+ * ever be parsed as HTML.
  */
 const ALLOWED_TAGS = new Set(["i", "b", "em", "strong", "sup", "sub", "span", "small"]);
 const TAG_RE = /<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g;
