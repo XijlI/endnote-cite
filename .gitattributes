@@ -1,0 +1,10 @@
+# Every file is stored and checked out with LF, so `node esbuild.config.mjs production`
+# produces the same main.js on Windows, macOS and CI. The Obsidian directory review
+# scans a fresh build and compares it with the committed bundle.
+* text=auto eol=lf
+
+# Binary assets must never be normalised.
+*.png binary
+*.jpg binary
+*.ico binary
+*.wasm binary
