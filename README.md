@@ -19,12 +19,11 @@ EndNote's own `.enl` database, so nothing has to be exported by hand.
 | **Bibliography** | `insert bibliography` writes a formatted list, or drop a ` ```endnote-bib ` block into the note for a live list. |
 | **Export** | `.docx` (with references, optionally styled by your own Word template), `.tex` + `.bib`, `.bib`, CSL-JSON. |
 | **Library sidebar** | Search the library, browse EndNote groups, and insert a citation with one click. |
-| **Language** | English (default) or 简体中文 for the whole interface — commands, sidebar, notices and settings. |
 | **EndNote-native Word output** | A second Word mode that hands the document to Word + EndNote so they write real `ADDIN EN.CITE` fields — the same thing you get from *Insert Citation* in Word. |
 
 ## Two kinds of Word output
 
-| | `导出为 Word (.docx)` | `导出为 Word（EndNote 可更新域）` |
+| | `Export to Word (.docx)` | `Export to Word (live EndNote fields)` |
 |---|---|---|
 | How it is produced | pandoc + citeproc, fully offline | pandoc → Word + EndNote `ENFormatBibliography` |
 | Citation content | formatted text | real EndNote fields + traveling library |
@@ -56,13 +55,13 @@ Multiple sources in one bracket: [@Shi2017; @deVos2022].
 ```
 
 - `[@` → autocomplete; <kbd>Enter</kbd> inserts.
-- <kbd>Ctrl/Cmd</kbd>+<kbd>P</kbd> → “EndNote: 插入引用” for the search dialog
+- <kbd>Ctrl/Cmd</kbd>+<kbd>P</kbd> → “EndNote: Insert citation” for the search dialog
   (<kbd>Shift</kbd>+<kbd>Enter</kbd> collects several references).
 - `[@key, p. 12]` adds a page locator, matching pandoc's citation syntax.
 
 ## Exporting
 
-Command palette → `EndNote: 导出为 Word (.docx)` / `导出为 LaTeX (.tex + .bib)`.
+Command palette → `EndNote: Export to Word (.docx)` / `EndNote: Export to LaTeX (.tex + .bib)`.
 
 Exports land next to the note (or in the folder set in the settings). Word files
 keep the note's name; LaTeX files are slugged (`My Paper` → `My_Paper.tex`) because
@@ -79,7 +78,7 @@ pdflatex My_Paper.tex
 
 ## EndNote-native Word output
 
-`EndNote: 导出为 Word（EndNote 可更新域）` produces a `.docx` that EndNote treats as
+`EndNote: Export to Word (live EndNote fields)` produces a `.docx` that EndNote treats as
 its own. The plugin converts every `[@key]` into EndNote's temporary citation
 syntax (`{Koh, 2016 #4@1335}`), runs pandoc, then drives Word and EndNote through
 `bridge/format-docx.ps1` so that **EndNote itself** rewrites them into
@@ -105,7 +104,7 @@ Requirements and caveats:
   text that looks like `{Author, #12}`, EndNote may stop and ask you to pick a
   reference; the export then times out with a hint.
 - The bibliography is appended at the end of the document, under the last heading
-  (the plugin reuses a trailing `参考文献` / `References` heading, or adds one).
+  (the plugin reuses a trailing “References” heading, or adds one).
 
 ## The library sidebar
 
@@ -126,13 +125,6 @@ open a panel on the right:
 
 The list follows the library file: saving in EndNote refreshes it within a few
 seconds.
-
-## Language
-
-The interface ships in English (default) and 简体中文. Pick it under **Settings ▸
-EndNote Cite ▸ Language** — commands, the sidebar, notices and this settings page
-all switch immediately; *Follow Obsidian* tracks Obsidian's own UI language. The
-language only affects the interface, never the notes or the exported files.
 
 ## Style notes
 
