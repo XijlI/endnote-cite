@@ -13,14 +13,55 @@ export interface CiteRenderer {
 }
 
 /**
- * citeproc only ever emits inline formatting tags, but the text inside them comes
- * from the user's own library, so strip anything that is not a known formatting
- * tag before handing it to innerHTML.
+ * citeproc emits inline formatting only, but the text inside comes from the
+ * user's own library. Rather than sanitising a string and handing it to
+ * `innerHTML`, we walk the markup and rebuild the few tags we allow as DOM
+ * nodes, so nothing else can ever be parsed as HTML.
  */
-export function sanitizeCslHtml(html: string): string {
-  return html
-    .replace(/<(?!\/?(?:i|b|em|strong|sup|sub|span|small|sc)\b)[^>]*>/gi, "")
-    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+const ALLOWED_TAGS = new Set(["i", "b", "em", "strong", "sup", "sub", "span", "small"]);
+const TAG_RE = /<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g;
+
+export function appendCsl(parent: HTMLElement, html: string): void {
+  const stack: HTMLElement[] = [parent];
+  const open: string[] = [];
+  const text = (s: string) => {
+    if (s) stack[stack.length - 1].appendChild(document.createTextNode(decodeEntities(s)));
+  };
+  let last = 0;
+  let m: RegExpExecArray | null;
+  TAG_RE.lastIndex = 0;
+  while ((m = TAG_RE.exec(html))) {
+    text(html.slice(last, m.index));
+    last = m.index + m[0].length;
+    const tag = m[1].toLowerCase();
+    if (!ALLOWED_TAGS.has(tag)) continue; // unknown tag: drop the marker, keep its text
+    if (m[0].startsWith("</")) {
+      const at = open.lastIndexOf(tag);
+      if (at >= 0) {
+        open.length = at;
+        stack.length = at + 1;
+      }
+      continue;
+    }
+    if (m[0].endsWith("/>")) continue;
+    const child = document.createElement(tag);
+    stack[stack.length - 1].appendChild(child);
+    stack.push(child);
+    open.push(tag);
+  }
+  text(html.slice(last));
+}
+
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&#(\d+);/g, (_m, d: string) => String.fromCodePoint(Number(d)))
+    .replace(/&#x([0-9a-f]+);/gi, (_m, h: string) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&nbsp;/g, "\u00a0")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&");
 }
 
 class CiteWidget extends WidgetType {
@@ -33,7 +74,7 @@ class CiteWidget extends WidgetType {
   toDOM() {
     const span = document.createElement("span");
     span.className = "en-cite";
-    span.innerHTML = sanitizeCslHtml(this.html);
+    appendCsl(span, this.html);
     if (this.tooltip) span.setAttribute("aria-label", this.tooltip);
     span.title = this.tooltip;
     return span;

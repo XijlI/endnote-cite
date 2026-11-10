@@ -52,11 +52,14 @@ export class PluginSettingTab {
 }
 
 export class FakeEl {
-  children: FakeEl[] = [];
+  children: any[] = [];
   listeners: Record<string, ((ev: any) => void)[]> = {};
   value = "";
   textContent = "";
   focused = false;
+  style: Record<string, string> = {};
+  offsetHeight = 0;
+  offsetWidth = 0;
   constructor(public cls?: string, public text?: string) {
     if (text) this.textContent = text;
   }
@@ -111,11 +114,22 @@ export class FakeEl {
     ev.preventDefault ??= () => {};
     for (const fn of this.listeners[type] ?? []) fn(ev);
   }
-  appendChild() {}
+  remove() {
+    this.removed = true;
+  }
+  removed = false;
+  getBoundingClientRect() {
+    return { left: 0, top: 0, right: 0, bottom: 0, width: 0, height: 0 };
+  }
+  appendChild(child: any) {
+    this.children.push(child);
+    return child;
+  }
   /** All descendants carrying the given class. */
   findAll(cls: string): FakeEl[] {
     const out: FakeEl[] = [];
-    const walk = (el: FakeEl) => {
+    const walk = (el: any) => {
+      if (!(el instanceof FakeEl)) return;
       if (el.hasClass(cls)) out.push(el);
       el.children.forEach(walk);
     };
@@ -130,6 +144,47 @@ export class FakeEl {
     return [this.textContent, ...this.children.map((c) => c.dump())].filter(Boolean).join(" | ");
   }
 }
+
+/** Minimal text node so DOM-building code runs headlessly. */
+class FakeTextNode {
+  parentNode: any = null;
+  constructor(public nodeValue: string) {}
+  get textContent() {
+    return this.nodeValue;
+  }
+  dump() {
+    return this.nodeValue;
+  }
+}
+
+// window === globalThis in the harness; the view attaches a few global listeners.
+(globalThis as any).addEventListener ??= () => {};
+(globalThis as any).removeEventListener ??= () => {};
+
+const stubBody = new FakeEl();
+(globalThis as any).document = {
+  documentElement: { style: {} },
+  body: stubBody,
+  createElement(tag: string) {
+    const el = new FakeEl();
+    el.tag = tag;
+    return el;
+  },
+  createTextNode(t: string) {
+    return new FakeTextNode(t);
+  },
+  createDocumentFragment() {
+    return new FakeEl();
+  },
+  addEventListener() {},
+  removeEventListener() {},
+  querySelector() {
+    return null;
+  },
+  querySelectorAll() {
+    return [];
+  },
+};
 
 export class Setting {
   constructor(el: any) {}

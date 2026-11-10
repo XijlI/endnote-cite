@@ -5,7 +5,7 @@ import { LibraryStore, readEndNoteStyleName } from "./library";
 import { Exporter } from "./export";
 import { CiteEngine } from "./csl";
 import { findCitations } from "./citation";
-import { citeDecorations, sanitizeCslHtml } from "./editor";
+import { appendCsl, citeDecorations } from "./editor";
 import { CiteSuggest, CiteInsertModal } from "./suggest";
 import { CiteExplorerView, VIEW_TYPE } from "./explorer";
 import { STYLE_PRESETS, findPreset, matchPreset } from "./styles-registry";
@@ -317,7 +317,7 @@ export default class EndNoteCitePlugin extends Plugin {
       items: this.library.items,
       format: "html",
     });
-    const out = engine.formatClusters(clusters).map((h) => sanitizeCslHtml(h));
+    const out = engine.formatClusters(clusters);
     this.renderCache = { sig, rev: this.styleRev, out };
     return out;
   }
@@ -352,7 +352,7 @@ export default class EndNoteCitePlugin extends Plugin {
         if (html) {
           const span = document.createElement("span");
           span.className = "en-cite";
-          span.innerHTML = sanitizeCslHtml(html);
+          appendCsl(span, html);
           frag.appendChild(span);
         } else {
           frag.appendChild(document.createTextNode(m[0]));
@@ -460,7 +460,7 @@ export default class EndNoteCitePlugin extends Plugin {
     const list = el.createEl("ol", { cls: "en-bib-list" });
     for (const entry of bib.entries) {
       const li = list.createEl("li");
-      li.innerHTML = sanitizeCslHtml(entry);
+      appendCsl(li, entry);
       if (bib.hangingIndent) li.addClass("en-hanging");
     }
     const missing = keys.filter((k) => !this.library.byKey.has(k));

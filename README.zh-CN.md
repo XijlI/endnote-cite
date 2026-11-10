@@ -32,6 +32,18 @@
 | 依赖 | pandoc | pandoc + Word + 装了 CWYW 加载项的 EndNote |
 | 文件名 | `笔记.docx` | `笔记 (EndNote).docx` |
 
+## 隐私与本地文件
+
+Obsidian 的插件政策要求明确说明"访问库外文件"的行为，所以：
+
+- **不联网、无遥测。** 插件不会连接任何服务器，没有统计、没有更新检查、没有崩溃上报。
+- **只读一个库外文件** —— 你指定路径的那个 `.enl` EndNote 文献库（通常在
+  `文档\My EndNote Library.enl`）。EndNote 就把库放在那里，这也是它必须在库外被读取的
+  唯一原因。文件以**只读**方式打开，插件从不写入；SQLite 需要稳定快照时会先复制一份到
+  临时目录再读。
+- **导出时才调用本机工具**：文本导出用 `pandoc`；Word 真 EndNote 域导出在 Windows 上
+  通过 COM 调用你本机安装的 Word 和 EndNote。数据不会离开你的电脑。
+
 ## 前置条件
 
 - 桌面版 Obsidian 1.5 以上（用到 Node 能力，移动端不支持）。

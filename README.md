@@ -33,6 +33,22 @@ EndNote's own `.enl` database, so nothing has to be exported by hand.
 | Needs | pandoc | pandoc + Word + EndNote with the CWYW add-in |
 | File name | `Note.docx` | `Note (EndNote).docx` |
 
+## Privacy and local files
+
+Obsidian's directory policies ask for a clear disclosure when a plugin touches files
+outside the vault, so:
+
+- **No network, no telemetry.** The plugin never contacts a server. No analytics, no
+  update pings, no crash reporting.
+- **It reads one file outside your vault** — the `.enl` EndNote library you point it at
+  (typically `Documents\My EndNote Library.enl`). EndNote keeps the library there, and
+  that is the only reason the path is outside the vault. The file is opened **read-only**;
+  the plugin never writes to it, and copies it to a temporary folder when SQLite needs a
+  stable snapshot.
+- **Local tools are used for export only**: `pandoc` for the text exports, and on Windows
+  PowerShell plus your installed Microsoft Word (through COM) to generate live EndNote
+  fields. Nothing leaves your computer.
+
 ## Requirements
 
 - Desktop Obsidian 1.5+ (the plugin uses Node APIs, so mobile is not supported).

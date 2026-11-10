@@ -289,5 +289,4 @@ export class Exporter {
 
 function notify(msg: string) {
   new Notice(msg, 8000);
-  console.log("[endnote-cite]", msg);
 }

@@ -10,6 +10,7 @@ import { TFile } from "obsidian";
 import EndNoteCitePlugin from "../src/main";
 import { obsidianToPandoc } from "../src/export";
 import { planCitationInsert } from "../src/insert";
+import { appendCsl } from "../src/editor";
 
 (globalThis as any).window = globalThis;
 
@@ -357,6 +358,22 @@ async function main() {
   check("editing the note adds the new entry", after === before + 1, `${before} → ${after}`);
   plugin.settings.bibTitle = "References";
   await plugin.saveSettings();
+
+  // ── 12. citation markup is built as nodes, never as HTML ────
+  console.log("--- 12. citation markup ---");
+  const holder: any = new FakeEl();
+  appendCsl(holder, 'de Vos <i>et al.</i> &amp; Koh<sup>2</sup><script>alert(1)</script>');
+  const markup = holder.dump();
+  check(
+    "allowed formatting tags become elements",
+    holder.children.some((c: any) => c.tag === "i") && holder.children.some((c: any) => c.tag === "sup")
+  );
+  check("entities are decoded", markup.includes(" & ") && !markup.includes("&amp;"), markup);
+  check(
+    "unknown tags are dropped, their text kept",
+    !markup.includes("<script") && markup.includes("alert(1)"),
+    markup
+  );
 
   console.log("\nvault root:", vaultRoot);
 }
