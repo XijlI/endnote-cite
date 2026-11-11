@@ -38,21 +38,30 @@ EndNote's own `.enl` database, so nothing has to be exported by hand.
 | Needs | pandoc | pandoc + Word + EndNote with the CWYW add-in |
 | File name | `Note.docx` | `Note (EndNote).docx` |
 
-## Privacy and local files
+## Disclosures
 
-Obsidian's directory policies ask for a clear disclosure when a plugin touches files
-outside the vault, so:
+Obsidian's directory policies ask plugins to be explicit about file access, shell use and
+network traffic, so here is the complete list.
 
-- **No network, no telemetry.** The plugin never contacts a server. No analytics, no
-  update pings, no crash reporting.
-- **It reads one file outside your vault** — the `.enl` EndNote library you point it at
-  (typically `Documents\My EndNote Library.enl`). EndNote keeps the library there, and
-  that is the only reason the path is outside the vault. The file is opened **read-only**;
-  the plugin never writes to it, and copies it to a temporary folder when SQLite needs a
-  stable snapshot.
-- **Local tools are used for export only**: `pandoc` for the text exports, and on Windows
-  PowerShell plus your installed Microsoft Word (through COM) to generate live EndNote
-  fields. Nothing leaves your computer.
+- **Network: none.** The plugin never contacts a server — no analytics, no update pings,
+  no crash reporting, no sync. Two `fetch`/`XMLHttpRequest` call sites exist inside the
+  bundled sql.js WASM loader and citeproc's XML parser; both are only ever handed a
+  `data:` URL or the inline WebAssembly bytes, so they never open a socket. The `http://`
+  strings in the bundle are XML namespace identifiers and citation-style metadata links
+  from the CSL files, never requests.
+- **Files outside the vault.** The only one is the `.enl` EndNote library you point the
+  plugin at (typically `Documents\My EndNote Library.enl`) — EndNote keeps the library
+  there, which is the only reason it sits outside the vault. It is opened **read-only**,
+  never written; when EndNote holds a lock, a temporary copy is read and deleted.
+- **Shell execution.** Only for exports, and only with the tools you already installed:
+  `pandoc` for the text exports, and on Windows PowerShell + Microsoft Word (through COM)
+  to build live EndNote fields. Nothing is downloaded or installed by the plugin.
+- **Clipboard: write-only.** *Copy citation key* puts an `@key` on the clipboard. The
+  plugin never reads the clipboard.
+- **Bundled WebAssembly.** `sql-wasm.wasm` is SQLite compiled to WebAssembly (from
+  [sql.js](https://github.com/sql-js/sql.js), MIT), inlined into `main.js`. It reads the
+  `.enl` database in-process and exports its memory to JavaScript by design — that is how
+  the SQLite engine works. No other native code is bundled.
 
 ## Requirements
 

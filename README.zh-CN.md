@@ -36,17 +36,23 @@
 | 依赖 | pandoc | pandoc + Word + 装了 CWYW 加载项的 EndNote |
 | 文件名 | `笔记.docx` | `笔记 (EndNote).docx` |
 
-## 隐私与本地文件
+## 行为披露
 
-Obsidian 的插件政策要求明确说明"访问库外文件"的行为，所以：
+Obsidian 的插件政策要求插件把「文件访问、命令执行、联网」讲清楚，以下是完整清单。
 
-- **不联网、无遥测。** 插件不会连接任何服务器，没有统计、没有更新检查、没有崩溃上报。
-- **只读一个库外文件** —— 你指定路径的那个 `.enl` EndNote 文献库（通常在
-  `文档\My EndNote Library.enl`）。EndNote 就把库放在那里，这也是它必须在库外被读取的
-  唯一原因。文件以**只读**方式打开，插件从不写入；SQLite 需要稳定快照时会先复制一份到
-  临时目录再读。
-- **导出时才调用本机工具**：文本导出用 `pandoc`；Word 真 EndNote 域导出在 Windows 上
-  通过 COM 调用你本机安装的 Word 和 EndNote。数据不会离开你的电脑。
+- **联网：无。** 插件不连接任何服务器 —— 没有统计、没有更新检查、没有崩溃上报、没有同步。
+  打包进来的 sql.js WASM 加载器和 citeproc 的 XML 解析器里各有 `fetch` / `XMLHttpRequest`
+  调用点，但它们只接收 `data:` URL 或内联的 WebAssembly 字节，永远不会建立网络连接。
+  `main.js` 里的 `http://` 字符串是 XML 命名空间标识和 CSL 样式文件里的元数据链接，不是请求。
+- **库外文件。** 只有一个：你指定给插件的那份 `.enl` EndNote 文献库（通常在
+  `文档\My EndNote Library.enl`）—— EndNote 就把库放在那儿，这也是它必须在库外读取的唯一原因。
+  文件以**只读**方式打开，插件从不写入；EndNote 独占锁定时会复制一份临时副本读取并随即删除。
+- **命令执行。** 只用于导出，且只用你本来就装好的工具：文本导出调用 `pandoc`；
+  Windows 上通过 COM 调用本机的 Word 生成 EndNote 真域。插件不会下载或安装任何东西。
+- **剪贴板：只写不读。**「复制引用键」会把 `@key` 写进剪贴板，插件从不读取剪贴板内容。
+- **内置 WebAssembly。** `sql-wasm.wasm` 是编译成 WebAssembly 的 SQLite（来自
+  [sql.js](https://github.com/sql-js/sql.js)，MIT），内联在 `main.js` 里，用于在进程内读取
+  `.enl` 数据库；它向 JavaScript 暴露线性内存是 SQLite 引擎的工作方式。除此之外没有任何原生代码。
 
 ## 前置条件
 

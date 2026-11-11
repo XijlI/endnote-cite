@@ -156,6 +156,10 @@
 /* floating group list (portalled to body) */
 .en-exp-menu {
   position: fixed;
+  /* Geometry comes from TypeScript as custom properties — see openMenu(). */
+  left: var(--en-menu-left, 8px);
+  top: var(--en-menu-top, 8px);
+  min-width: var(--en-menu-width, 180px);
   z-index: var(--layer-menu, 1000);
   display: flex;
   flex-direction: column;

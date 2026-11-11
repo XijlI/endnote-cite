@@ -178,19 +178,19 @@ export class CiteExplorerView extends ItemView {
         this.selectGroup(row.id);
       });
     }
-    // Only the geometry is set from code — `position` and the look live in styles.css,
-    // because the review rejects fixed CSS values written in TypeScript.
+    // Geometry travels as CSS custom properties: the review rule flags any real CSS
+    // property set from code, and custom properties are the sanctioned channel.
     menu.setCssProps({
-      left: `${Math.round(rect.left)}px`,
-      top: `${Math.round(rect.bottom + 4)}px`,
-      "min-width": `${Math.round(rect.width)}px`,
+      "--en-menu-left": `${Math.round(rect.left)}px`,
+      "--en-menu-top": `${Math.round(rect.bottom + 4)}px`,
+      "--en-menu-width": `${Math.round(rect.width)}px`,
     });
     // Keep the menu on screen when the panel sits near the bottom edge.
     const menuHeight = menu.offsetHeight || 260;
     const maxTop = activeWindow.innerHeight - menuHeight - 8;
     if (rect.bottom + 4 > maxTop) {
       menu.setCssProps({
-        top: `${Math.max(8, Math.min(rect.top - menuHeight - 4, maxTop))}px`,
+        "--en-menu-top": `${Math.max(8, Math.min(rect.top - menuHeight - 4, maxTop))}px`,
       });
     }
 
