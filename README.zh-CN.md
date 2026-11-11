@@ -196,4 +196,13 @@ npm test          # 无界面端到端测试（需要 pandoc；涉及 Word/EndNo
 
 ## 许可
 
-MIT。
+插件自身的源码是 MIT —— 见 [`LICENSE`](LICENSE)。
+
+`main.js` 里还打包了第三方组件，它们各自保留原有许可：
+
+| 组件 | 许可 | 用途 |
+|---|---|---|
+| [citeproc-js](https://github.com/Juris-M/citeproc-js) 2.4.63 | CPAL-1.0 或 AGPL-1.0 | CSL 引用处理器（原样打包，未修改；源码见链接和包的 `node_modules/citeproc`） |
+| [sql.js](https://github.com/sql-js/sql.js) 1.16.0 | MIT | 编译成 WebAssembly 的 SQLite，用来读 `.enl` 库 |
+| SQLite | 公有领域 | 在 sql.js 内部 |
+| [CSL 样式与语言包](https://github.com/citation-style-language/styles) | CC BY-SA 3.0 | Harvard (Cite Them Right)、APA、Chicago、Nature、IEEE、AMA、Elsevier Vancouver、Springer、GB/T 7714-2015（顺序编码制与著者-出版年制） |

@@ -220,4 +220,13 @@ EndNote-field Word export cannot run.
 
 ## License
 
-MIT.
+This plugin's own source is MIT — see [`LICENSE`](LICENSE).
+
+`main.js` also bundles third-party components that keep their own licences:
+
+| Component | Licence | Used for |
+|---|---|---|
+| [citeproc-js](https://github.com/Juris-M/citeproc-js) 2.4.63 | CPAL-1.0 or AGPL-1.0 | CSL citation processor (bundled unmodified; source at the link and in the package's `node_modules/citeproc`) |
+| [sql.js](https://github.com/sql-js/sql.js) 1.16.0 | MIT | SQLite compiled to WebAssembly, reads the `.enl` database |
+| SQLite | Public domain | inside sql.js |
+| [CSL styles and locales](https://github.com/citation-style-language/styles) | CC BY-SA 3.0 | Harvard (Cite Them Right), APA, Chicago, Nature, IEEE, AMA, Elsevier Vancouver, Springer, GB/T 7714-2015 (numeric and author-date) |
