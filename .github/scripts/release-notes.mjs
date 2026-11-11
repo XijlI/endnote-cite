@@ -30,9 +30,11 @@ const git = (...args) => execFileSync("git", args, { encoding: "utf8" }).trim();
 let previous = "";
 try {
   // Tags reachable from HEAD, newest first, excluding this release's own tag.
-  previous = git("tag", "--list", "v*", "--sort=-v:refname")
+  // Tags are the bare version (no "v"), because the community directory matches the
+  // release against manifest.json verbatim.
+  previous = git("tag", "--list", "[0-9]*", "--sort=-v:refname")
     .split("\n")
-    .filter((t) => t && t !== `v${version}`)[0] ?? "";
+    .filter((t) => t && t !== version && t !== `v${version}`)[0] ?? "";
 } catch {
   previous = "";
 }
@@ -64,7 +66,7 @@ ${subjects.length ? subjects.join("\n") : "- Maintenance release."}
 
 ${
   previous
-    ? `**Full changelog**: https://github.com/${repo}/compare/${previous}...v${version}`
+    ? `**Full changelog**: https://github.com/${repo}/compare/${previous}...${version}`
     : ""
 }
 `;

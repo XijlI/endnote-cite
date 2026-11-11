@@ -1,11 +1,15 @@
 name: Release
 
-# Push a tag (git push origin v0.3.4) and GitHub builds, packages and publishes
-# the release by itself. The Actions tab's "Run workflow" button does the same and
-# creates the tag when it does not exist yet.
+# Push a tag (git push origin 0.3.4) and GitHub builds, packages and publishes the
+# release by itself. The Actions tab's "Run workflow" button does the same and creates
+# the tag when it does not exist yet.
+#
+# The tag MUST be the bare version, no "v" prefix: the community directory resolves
+# the release by the exact string in manifest.json and reports "No release matches
+# your manifest version" otherwise.
 on:
   push:
-    tags: ["v*"]
+    tags: ["[0-9]*"]
   workflow_dispatch:
     inputs:
       version:
@@ -42,7 +46,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
-            version="${GITHUB_REF_NAME#v}"
+            version="${GITHUB_REF_NAME#v}"   # tolerated, but tags are created without it
           else
             version="${INPUT_VERSION#v}"
           fi
@@ -88,16 +92,16 @@ jobs:
           VERSION: ${{ steps.v.outputs.version }}
         run: |
           set -euo pipefail
-          if git rev-parse -q --verify "refs/tags/v${VERSION}" > /dev/null; then
-            echo "tag v${VERSION} already exists — updating that release"
+          if git rev-parse -q --verify "refs/tags/${VERSION}" > /dev/null; then
+            echo "tag ${VERSION} already exists — updating that release"
           else
-            git tag -a "v${VERSION}" -m "EndNote Cite ${VERSION}"
-            git push origin "v${VERSION}"
+            git tag -a "${VERSION}" -m "EndNote Cite ${VERSION}"
+            git push origin "${VERSION}"
           fi
 
       - uses: softprops/action-gh-release@v3
         with:
-          tag_name: v${{ steps.v.outputs.version }}
+          tag_name: ${{ steps.v.outputs.version }}
           name: ${{ steps.v.outputs.version }}
           body_path: dist/release-notes.md
           files: |

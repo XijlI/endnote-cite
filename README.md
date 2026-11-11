@@ -208,7 +208,9 @@ npm test          # headless end-to-end test (needs pandoc; skipped parts need W
 ```
 
 Releasing is one tag: bump `manifest.json`, `package.json` and `versions.json`,
-commit, then `git push origin v0.3.4`. `.github/workflows/release.yml` builds the
+commit, then `git push origin 0.3.6` (the tag is the bare version — the community
+directory resolves the release by exactly the string in `manifest.json`, so a `v`
+prefix makes it report "No release matches your manifest version"). `.github/workflows/release.yml` builds the
 plugin, zips it with `bridge/`, writes `SHA256SUMS.txt` and publishes the GitHub
 release. Notes come from `docs/release-notes/v<version>.md` when that file exists
 (English body plus a collapsible 中文说明), otherwise from the commits since the
