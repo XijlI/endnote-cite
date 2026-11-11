@@ -1,5 +1,6 @@
 import { MarkdownView, Notice, Plugin, TFile, Editor } from "obsidian";
 import fs from "fs";
+import { execFile } from "child_process";
 import { EndNoteCiteSettings, DEFAULT_SETTINGS, EndNoteCiteSettingTab } from "./settings";
 import { LibraryStore, readEndNoteStyleName } from "./library";
 import { Exporter } from "./export";
@@ -92,13 +93,14 @@ export default class EndNoteCitePlugin extends Plugin {
 
     // Keep the library in sync while EndNote is open.
     this.registerInterval(
-      window.setInterval(async () => {
+      window.setInterval(() => {
         const p = this.libraryPath();
         if (!p) return;
-        if (await this.library.reloadIfChanged(p)) {
+        void this.library.reloadIfChanged(p).then((changed) => {
+          if (!changed) return;
           this.invalidate();
           new Notice(t("msg.libraryUpdated", { n: this.library.refs.length }));
-        }
+        });
       }, 5000)
     );
   }
@@ -120,7 +122,7 @@ export default class EndNoteCitePlugin extends Plugin {
     this.commandIds = [];
     const add = (id: string, name: string, rest: Record<string, unknown>) => {
       this.commandIds.push(id);
-      this.addCommand({ id, name, ...rest } as any);
+      this.addCommand({ id, name, ...rest });
     };
 
     add("open-explorer", t("cmd.openExplorer"), { callback: () => void this.activateExplorer() });
@@ -210,20 +212,24 @@ export default class EndNoteCitePlugin extends Plugin {
   async activateExplorer(): Promise<void> {
     const existing = this.app.workspace.getLeavesOfType(VIEW_TYPE);
     if (existing.length) {
-      await this.app.workspace.revealLeaf(existing[0]);
+      // `revealLeaf` is newer than our minAppVersion; expanding the split and
+      // activating the leaf does the same on every supported version.
+      this.app.workspace.rightSplit.expand();
+      this.app.workspace.setActiveLeaf(existing[0], { focus: true });
       (existing[0].view as CiteExplorerView)?.focusSearch?.();
       return;
     }
     const leaf = this.app.workspace.getRightLeaf(false) ?? this.app.workspace.getLeaf(true);
     await leaf.setViewState({ type: VIEW_TYPE, active: true });
-    await this.app.workspace.revealLeaf(leaf);
+    this.app.workspace.rightSplit.expand();
+    this.app.workspace.setActiveLeaf(leaf, { focus: true });
     (leaf.view as CiteExplorerView)?.focusSearch?.();
   }
 
   /** Redraws any open library sidebar (after reload / style change). */
   refreshExplorer(): void {
     const leaves = (this.app.workspace as any).getLeavesOfType?.(VIEW_TYPE) ?? [];
-    for (const leaf of leaves) (leaf.view as any)?.refresh?.();
+    for (const leaf of leaves) (leaf.view)?.refresh?.();
   }
 
   // ── style ─────────────────────────────────────────────────
@@ -335,32 +341,31 @@ export default class EndNoteCitePlugin extends Plugin {
   }
 
   private applyReadingMode(el: HTMLElement, map: Map<string, string>) {
-    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const walker = activeDocument.createTreeWalker(el, NodeFilter.SHOW_TEXT);
     const nodes: Text[] = [];
     while (walker.nextNode()) nodes.push(walker.currentNode as Text);
     for (const node of nodes) {
       const value = node.nodeValue || "";
       if (!value.includes("[@")) continue;
-      const re = /\[[^\[\]\n]*?@[^\[\]\n]*?\]/g;
+      const re = /\[[^[\]\n]*?@[^[\]\n]*?\]/g;
       if (!re.test(value)) continue;
-      const frag = document.createDocumentFragment();
+      const frag = createFragment();
       let last = 0;
       re.lastIndex = 0;
       let m: RegExpExecArray | null;
       while ((m = re.exec(value))) {
-        if (m.index > last) frag.appendChild(document.createTextNode(value.slice(last, m.index)));
+        if (m.index > last) frag.appendChild(activeDocument.createTextNode(value.slice(last, m.index)));
         const html = map.get(m[0]);
         if (html) {
-          const span = document.createElement("span");
-          span.className = "en-cite";
+          const span = createSpan({ cls: "en-cite" });
           appendCsl(span, html);
           frag.appendChild(span);
         } else {
-          frag.appendChild(document.createTextNode(m[0]));
+          frag.appendChild(activeDocument.createTextNode(m[0]));
         }
         last = m.index + m[0].length;
       }
-      if (last < value.length) frag.appendChild(document.createTextNode(value.slice(last)));
+      if (last < value.length) frag.appendChild(activeDocument.createTextNode(value.slice(last)));
       node.parentNode?.replaceChild(frag, node);
     }
   }
@@ -407,7 +412,6 @@ export default class EndNoteCitePlugin extends Plugin {
   }
 
   async checkPandoc(): Promise<string> {
-    const { execFile } = require("child_process");
     return new Promise((resolve) => {
       execFile(this.settings.pandocPath, ["--version"], { windowsHide: true }, (err: any, stdout: string) => {
         resolve(err ? "" : String(stdout).split("\n")[0]);

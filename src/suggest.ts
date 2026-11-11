@@ -33,7 +33,7 @@ export class CiteSuggest extends EditorSuggest<Ref> {
     const closed = line.lastIndexOf("]");
     const inCluster = open >= 0 && open > closed;
     const scope = inCluster ? line.slice(open + 1) : line;
-    const m = /@([A-Za-z0-9_\-]*)$/.exec(scope);
+    const m = /@([A-Za-z0-9_-]*)$/.exec(scope);
     if (!m) return null;
     const start: EditorPosition = { line: cursor.line, ch: cursor.ch - m[0].length };
     return { start, end: cursor, query: m[1] };

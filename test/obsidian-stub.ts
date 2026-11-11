@@ -99,6 +99,12 @@ export class FakeEl {
     return (this.cls ?? "").split(/\s+/).includes(c);
   }
   setAttribute() {}
+  setCssStyles(o: Record<string, string>) {
+    Object.assign(this.style, o);
+  }
+  setCssProps(o: Record<string, string>) {
+    Object.assign(this.style, o);
+  }
   setText(t: string) {
     this.textContent = t;
     this.text = t;
@@ -185,6 +191,25 @@ const stubBody = new FakeEl();
     return [];
   },
 };
+
+// Globals Obsidian injects into the plugin's scope.
+(globalThis as any).createSpan = (o?: any) => {
+  const el = new FakeEl(o?.cls, o?.text);
+  el.tag = "span";
+  return el;
+};
+(globalThis as any).createFragment = () => new FakeEl();
+(globalThis as any).createEl = (tag: string, o?: any) => {
+  const el = new FakeEl(o?.cls, o?.text);
+  el.tag = tag;
+  return el;
+};
+(globalThis as any).activeDocument = (globalThis as any).document;
+(globalThis as any).activeWindow = globalThis;
+
+export function getLanguage() {
+  return "en";
+}
 
 export class Setting {
   constructor(el: any) {}

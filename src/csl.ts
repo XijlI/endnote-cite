@@ -92,7 +92,7 @@ export class CiteEngine {
         const list = res?.[1] ?? [];
         const hit = list.find((entry: any[]) => entry[0] === citation.citationID) ?? list[0];
         rendered = hit ? hit[1] : "";
-      } catch (e) {
+      } catch {
         rendered = `[cite error: ${cluster.raw}]`;
       }
       out.push(rendered);

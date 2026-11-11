@@ -1,7 +1,7 @@
-import { Notice } from "obsidian";
 import fs from "fs";
 import os from "os";
 import path from "path";
+import { execFileSync } from "child_process";
 import initSqlJs from "sql.js";
 import wasmBinary from "../assets/sql-wasm.wasm";
 import { readLibrary, readGroups, toCSL, parseRefTypeTable, REF_TYPE_NAMES } from "./endnote";
@@ -53,7 +53,7 @@ export class LibraryStore {
       let bytes: Uint8Array;
       try {
         bytes = new Uint8Array(fs.readFileSync(file));
-      } catch (e) {
+      } catch {
         // EndNote may hold an exclusive lock — read through a temp copy instead.
         const tmp = path.join(os.tmpdir(), `en-cite-${Date.now()}.enl`);
         fs.copyFileSync(file, tmp);
@@ -151,7 +151,7 @@ export class LibraryStore {
   /** Citation keys referenced in a note, in first-use order. */
   keysInText(text: string): string[] {
     const out: string[] = [];
-    const re = /\[[^\[\]\n]*?@([A-Za-z0-9][A-Za-z0-9_-]*)/g;
+    const re = /\[[^[\]\n]*?@([A-Za-z0-9][A-Za-z0-9_-]*)/g;
     let m: RegExpExecArray | null;
     while ((m = re.exec(text))) if (!out.includes(m[1])) out.push(m[1]);
     return out;
@@ -161,7 +161,6 @@ export class LibraryStore {
 /** Reads the output style that EndNote currently has selected (Windows only). */
 export function readEndNoteStyleName(): string {
   if (process.platform !== "win32") return "";
-  const { execFileSync } = require("child_process");
   const tries: [string, string][] = [
     ["HKCU\\Software\\ISI ResearchSoft\\EndNote\\Addin\\Preferences", "DefaultOutputStyle"],
     ["HKCU\\Software\\ISI ResearchSoft\\EndNote\\Preferences", "PrefsString(002)"],

@@ -108,6 +108,8 @@ const app: any = {
     revealLeaf: async () => {},
     getRightLeaf: () => null,
     getLeaf: () => null,
+    rightSplit: { expand() {} },
+    setActiveLeaf() {},
   },
 };
 

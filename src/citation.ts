@@ -2,7 +2,7 @@
 
 import type { CitationCluster } from "./types";
 
-const CLUSTER = /\[([^\[\]\n]*?@[^\[\]\n]*?)\]/g;
+const CLUSTER = /\[([^[\]\n]*?@[^[\]\n]*?)\]/g;
 
 /**
  * Parses `[@a]`, `[@a; @b]`, `[@a, p. 12]`, `[-@a]`, `[see @a, ch. 2]`.
@@ -22,7 +22,7 @@ export function findCitations(text: string): CitationCluster[] {
       const suppressAuthor = part.slice(0, at).trim().endsWith("-");
       const before = part.slice(0, at).replace(/-$/, "").trim();
       const after = part.slice(at + 1);
-      const keyMatch = /^([A-Za-z0-9_:.#$%&+?<>~\/-]+)/.exec(after.trim());
+      const keyMatch = /^([A-Za-z0-9_:.#$%&+?<>~/-]+)/.exec(after.trim());
       if (!keyMatch) continue;
       const id = keyMatch[1].replace(/[.,;:]$/, "");
       const rest = after.trim().slice(keyMatch[1].length).replace(/^,\s*/, "").trim();

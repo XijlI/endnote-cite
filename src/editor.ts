@@ -25,7 +25,7 @@ export function appendCsl(parent: HTMLElement, html: string): void {
   const stack: HTMLElement[] = [parent];
   const open: string[] = [];
   const text = (s: string) => {
-    if (s) stack[stack.length - 1].appendChild(document.createTextNode(decodeEntities(s)));
+    if (s) stack[stack.length - 1].appendChild(activeDocument.createTextNode(decodeEntities(s)));
   };
   let last = 0;
   let m: RegExpExecArray | null;
@@ -44,7 +44,7 @@ export function appendCsl(parent: HTMLElement, html: string): void {
       continue;
     }
     if (m[0].endsWith("/>")) continue;
-    const child = document.createElement(tag);
+    const child = stack[stack.length - 1].createEl(tag as keyof HTMLElementTagNameMap);
     stack[stack.length - 1].appendChild(child);
     stack.push(child);
     open.push(tag);
@@ -72,8 +72,7 @@ class CiteWidget extends WidgetType {
     return other.html === this.html && other.tooltip === this.tooltip;
   }
   toDOM() {
-    const span = document.createElement("span");
-    span.className = "en-cite";
+    const span = createSpan({ cls: "en-cite" });
     appendCsl(span, this.html);
     if (this.tooltip) span.setAttribute("aria-label", this.tooltip);
     span.title = this.tooltip;
@@ -117,7 +116,7 @@ export function citeDecorations(renderer: CiteRenderer) {
     let html: string[];
     try {
       html = renderer.render(text);
-    } catch (e) {
+    } catch {
       return Decoration.none;
     }
     const codes = codeRanges(text);

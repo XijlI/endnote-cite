@@ -123,7 +123,7 @@ export class Exporter {
     fs.mkdirSync(dir, { recursive: true });
     // LaTeX toolchains choke on spaces in \bibliography{...}, so tex/bib names
     // are slugged; Word files keep the note's name as-is.
-    const base = ext === "docx" ? file.basename : file.basename.replace(/[^\w.\-]+/g, "_");
+    const base = ext === "docx" ? file.basename : file.basename.replace(/[^\w.-]+/g, "_");
     return path.join(dir, `${base}${suffix}.${ext}`);
   }
 
@@ -131,7 +131,7 @@ export class Exporter {
   private pluginDir(): string {
     const manifest: any = this.plugin.manifest;
     if (manifest?.dir && path.isAbsolute(manifest.dir)) return manifest.dir;
-    return path.join(this.vaultRoot(), ".obsidian", "plugins", manifest?.id ?? "endnote-cite");
+    return path.join(this.vaultRoot(), this.plugin.app.vault.configDir, "plugins", manifest?.id ?? "endnote-cite");
   }
 
   private async prepare(file: TFile): Promise<{ dir: string; mdPath: string }> {
@@ -173,7 +173,7 @@ export class Exporter {
     const bytes = fs.readFileSync(outDocx);
     await this.plugin.app.vault.adapter.writeBinary(
       dest.slice(this.vaultRoot().length + 1).replace(/\\/g, "/"),
-      bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer
+      bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
     );
     notify(t("export.docxDone", { path: dest }));
   }
@@ -238,7 +238,7 @@ export class Exporter {
     const bytes = fs.readFileSync(outDocx);
     await this.plugin.app.vault.adapter.writeBinary(
       dest.slice(this.vaultRoot().length + 1).replace(/\\/g, "/"),
-      bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer
+      bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
     );
     notify(t("export.endnoteDone", { n: bridge.fields, path: dest }));
   }

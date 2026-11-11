@@ -91,7 +91,7 @@ export class CiteExplorerView extends ItemView {
 
   /** Redraws everything (after a library reload, style or language change). */
   refresh(): void {
-    if (this.searchEl) (this.searchEl as HTMLInputElement).placeholder = t("exp.search");
+    if (this.searchEl) (this.searchEl).placeholder = t("exp.search");
     this.render();
   }
 
@@ -165,10 +165,10 @@ export class CiteExplorerView extends ItemView {
   private openMenu(): void {
     this.closeMenu();
     this.menuOpen = true;
-    if (typeof document === "undefined" || !this.scopeEl) return;
+    if (typeof activeDocument === "undefined" || !this.scopeEl) return;
 
-    const rect = (this.scopeEl as HTMLElement).getBoundingClientRect();
-    const menu = document.body.createDiv({ cls: "en-exp-menu" });
+    const rect = (this.scopeEl).getBoundingClientRect();
+    const menu = activeDocument.body.createDiv({ cls: "en-exp-menu" });
     for (const row of this.scopeRows()) {
       const item = menu.createDiv({ cls: "en-exp-menu-item" + (row.id === this.groupId ? " is-active" : "") });
       item.createSpan({ cls: "en-exp-menu-name", text: row.name });
@@ -178,28 +178,36 @@ export class CiteExplorerView extends ItemView {
         this.selectGroup(row.id);
       });
     }
-    menu.style.position = "fixed";
-    menu.style.left = `${Math.round(rect.left)}px`;
-    menu.style.top = `${Math.round(rect.bottom + 4)}px`;
-    menu.style.minWidth = `${Math.round(rect.width)}px`;
+    // Only the geometry is set from code — `position` and the look live in styles.css,
+    // because the review rejects fixed CSS values written in TypeScript.
+    menu.setCssProps({
+      left: `${Math.round(rect.left)}px`,
+      top: `${Math.round(rect.bottom + 4)}px`,
+      "min-width": `${Math.round(rect.width)}px`,
+    });
     // Keep the menu on screen when the panel sits near the bottom edge.
-    const maxTop = window.innerHeight - (menu.offsetHeight || 260) - 8;
+    const menuHeight = menu.offsetHeight || 260;
+    const maxTop = activeWindow.innerHeight - menuHeight - 8;
     if (rect.bottom + 4 > maxTop) {
-      menu.style.top = `${Math.max(8, Math.min(rect.top - (menu.offsetHeight || 260) - 4, maxTop))}px`;
+      menu.setCssProps({
+        top: `${Math.max(8, Math.min(rect.top - menuHeight - 4, maxTop))}px`,
+      });
     }
 
     this.menu = menu;
-    document.addEventListener("mousedown", this.onDocDown, true);
-    window.addEventListener("keydown", this.onKeyDown, true);
-    window.addEventListener("resize", this.closeMenu);
+    activeDocument.addEventListener("mousedown", this.onDocDown, true);
+    activeWindow.addEventListener("keydown", this.onKeyDown, true);
+    activeWindow.addEventListener("resize", this.onWindowResize);
   }
+
+  private onWindowResize = () => this.closeMenu();
 
   closeMenu(): void {
     this.menuOpen = false;
-    if (typeof document === "undefined") return;
-    document.removeEventListener("mousedown", this.onDocDown, true);
-    window.removeEventListener("keydown", this.onKeyDown, true);
-    window.removeEventListener("resize", this.closeMenu);
+    if (typeof activeDocument === "undefined") return;
+    activeDocument.removeEventListener("mousedown", this.onDocDown, true);
+    activeWindow.removeEventListener("keydown", this.onKeyDown, true);
+    activeWindow.removeEventListener("resize", this.onWindowResize);
     this.menu?.remove();
     this.menu = null;
   }

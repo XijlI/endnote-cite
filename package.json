@@ -1,13 +1,15 @@
 {
   "name": "endnote-cite",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Cite as you write with your EndNote library, then export to Word or LaTeX.",
   "main": "main.js",
   "type": "module",
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-    "test": "node test/build.mjs && node test/.build/plugin-test.cjs"
+    "test": "node test/build.mjs && node test/.build/plugin-test.cjs",
+    "lint": "eslint .",
+    "lint:quiet": "eslint . --quiet"
   },
   "keywords": [
     "obsidian",
@@ -18,12 +20,16 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^22.10.2",
-    "builtin-modules": "^4.0.0",
     "esbuild": "^0.25.0",
+    "eslint": "^9.39.5",
+    "eslint-plugin-obsidianmd": "^0.5.1",
     "obsidian": "^1.8.7",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.72.2"
   },
   "dependencies": {
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.13",
     "citeproc": "^2.4.63",
     "sql.js": "^1.13.0"
   }

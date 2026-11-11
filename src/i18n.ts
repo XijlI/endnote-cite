@@ -238,10 +238,7 @@ export function resolveLanguage(setting: LangSetting | undefined): Lang {
   if (setting === "zh") return "zh";
   if (setting === "en" || !setting) return "en";
   try {
-    const raw =
-      (typeof window !== "undefined" && window.localStorage?.getItem("language")) ||
-      (typeof navigator !== "undefined" ? navigator.language : "") ||
-      "";
+    const raw = typeof navigator !== "undefined" ? navigator.language || "" : "";
     return /^zh/i.test(raw) ? "zh" : "en";
   } catch {
     return "en";

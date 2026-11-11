@@ -9,7 +9,7 @@
  * mapping to CSL-JSON lives in `toCSL()` below.
  */
 
-import initSqlJs, { SqlJsStatic } from "sql.js";
+import type { SqlJsStatic } from "sql.js";
 import type { EndNoteGroup, Ref } from "./types";
 import { t } from "./i18n";
 

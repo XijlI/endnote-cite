@@ -19,8 +19,9 @@
 }
 
 /* ── autocomplete ─────────────────────────────────────────── */
-.en-suggest-item {
-  padding: 6px 10px !important;
+/* Beating Obsidian's own .suggestion-item padding by specificity, not !important. */
+.suggestion-item.en-suggest-item {
+  padding: 6px 10px;
   line-height: 1.35;
 }
 .en-suggest-top {

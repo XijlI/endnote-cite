@@ -83,7 +83,7 @@ function norm(s: string): string {
     .toLowerCase()
     .replace(/\b(\d+(st|nd|rd|th))\b/g, " ")
     .replace(/\bcopy\b/g, " ")
-    .replace(/[^a-z0-9\/]+/g, " ")
+    .replace(/[^a-z0-9/]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
